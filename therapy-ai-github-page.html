@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Therapy AI Agent</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h2 { color: #4a90e2; }
+        .chat-box { min-height: 200px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; padding: 12px; margin-bottom: 16px; overflow-y: auto; }
+        .user { color: #333; font-weight: bold; }
+        .ai { color: #4a90e2; }
+        form { display: flex; gap: 8px; }
+        input[type=text] { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+        button { padding: 8px 16px; border: none; border-radius: 4px; background: #4a90e2; color: #fff; cursor: pointer; }
+        button:hover { background: #357ab8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Therapy AI Agent</h2>
+        <div class="chat-box" id="chatBox"></div>
+        <form id="chatForm">
+            <input type="text" id="userInput" placeholder="How are you feeling today?" required autocomplete="off" />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    <script>
+        const chatBox = document.getElementById('chatBox');
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        let conversation = [];
+
+        function aiResponse(input) {
+            const text = input.toLowerCase();
+            if (text.includes('sad') || text.includes('down')) {
+                return "I'm sorry you're feeling this way. Remember, tough times don't last. What is one thing you can do for yourself right now?";
+            }
+            if (text.includes('anxious') || text.includes('worried')) {
+                return "Anxiety is tough. Try taking a deep breath. What is something positive you can focus on today?";
+            }
+            if (text.includes('happy') || text.includes('good')) {
+                return "That's wonderful! Celebrate your wins, no matter how small.";
+            }
+            if (text.includes('motivate') || text.includes('help')) {
+                return "I'm here to help you find motivation. What is your goal for today?";
+            }
+            // Simple learning: echo last user input as a motivational phrase
+            if (conversation.length > 1) {
+                return `Earlier you said: "${conversation[conversation.length-2].user}". How do you feel about that now?`;
+            }
+            return "I'm here to listen and support you. Tell me more about how you're feeling.";
+        }
+
+        function renderChat() {
+            chatBox.innerHTML = '';
+            conversation.forEach(turn => {
+                chatBox.innerHTML += `<div class="user">You: ${turn.user}</div>`;
+                chatBox.innerHTML += `<div class="ai">AI: ${turn.ai}</div>`;
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        chatForm.onsubmit = function(e) {
+            e.preventDefault();
+            const userText = userInput.value.trim();
+            if (!userText) return;
+            const aiText = aiResponse(userText);
+            conversation.push({ user: userText, ai: aiText });
+            renderChat();
+            userInput.value = '';
+        };
+
+        // Initial greeting
+        conversation.push({ user: 'Hello', ai: 'Hi! I am your therapy AI agent. How are you feeling today?' });
+        renderChat();
+    </script>
+</body>
+</html>
