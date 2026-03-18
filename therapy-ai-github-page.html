@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mindful Therapist AI</title>
+    <style>
+        :root {
+            --bg: #f3f7f3;
+            --bg-soft: #e7efe6;
+            --surface: #ffffff;
+            --ink: #1f2a22;
+            --ink-soft: #4b5d52;
+            --accent: #2f7a5b;
+            --accent-2: #e1a95f;
+            --user: #d9efe1;
+            --ai: #f8f3e8;
+            --danger: #8b1e3f;
+            --shadow: 0 10px 30px rgba(26, 44, 34, 0.1);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 10% 10%, #dae9dc 0%, transparent 35%),
+                radial-gradient(circle at 90% 20%, #f1e5cf 0%, transparent 30%),
+                linear-gradient(140deg, var(--bg) 0%, var(--bg-soft) 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 18px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .main {
+            padding: 18px;
+            display: grid;
+            grid-template-rows: auto auto 1fr auto auto;
+            gap: 12px;
+            min-height: 78vh;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.45rem;
+            letter-spacing: 0.2px;
+        }
+
+        .sub {
+            margin: 4px 0 0;
+            color: var(--ink-soft);
+            font-size: 0.95rem;
+        }
+
+        .notice {
+            padding: 10px 12px;
+            border: 1px solid #d7e5db;
+            border-radius: 10px;
+            background: #f8fcf8;
+            color: var(--ink-soft);
+            font-size: 0.88rem;
+        }
+
+        .chat {
+            border: 1px solid #d7e5db;
+            border-radius: 12px;
+            padding: 12px;
+            overflow-y: auto;
+            background: #fcfffc;
+            min-height: 280px;
+            max-height: 52vh;
+        }
+
+        .msg {
+            margin: 0 0 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            line-height: 1.45;
+            animation: fadeIn 250ms ease;
+        }
+
+        .msg.user {
+            background: var(--user);
+            border: 1px solid #bfdbc8;
+        }
+
+        .msg.ai {
+            background: var(--ai);
+            border: 1px solid #eadfcb;
+        }
+
+        .label {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            border: 1px solid #bfd3c5;
+            background: #f7fbf8;
+            color: var(--ink);
+            border-radius: 999px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .composer {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+        }
+
+        input[type="text"] {
+            border: 1px solid #bfd3c5;
+            border-radius: 10px;
+            padding: 11px 12px;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        button[type="submit"],
+        .primary {
+            border: 0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            background: var(--accent);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .side {
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+            align-content: start;
+        }
+
+        .card {
+            border: 1px solid #dde8df;
+            border-radius: 12px;
+            padding: 12px;
+            background: #fbfdfb;
+        }
+
+        .card h2 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+        }
+
+        .muted {
+            color: var(--ink-soft);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .stat {
+            margin: 4px 0;
+            font-size: 0.9rem;
+        }
+
+        .danger {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .mood {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(2px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+            .main {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <section class="panel main">
+            <header>
+                <h1>Mindful Therapist AI</h1>
+                <p class="sub">A reflective companion that remembers your patterns and supports steady emotional growth.</p>
+            </header>
+
+            <div class="notice">
+                This tool is for support and reflection, not medical care. If you might hurt yourself or someone else, call <strong>911</strong> (US) or text/call <strong>988</strong> now.
+            </div>
+
+            <div id="chat" class="chat" aria-live="polite"></div>
+
+            <div class="controls">
+                <button class="chip" data-seed="I need a grounding exercise.">Ground me</button>
+                <button class="chip" data-seed="Can you help me reframe a negative thought?">Reframe</button>
+                <button class="chip" data-seed="I want a gentle check-in.">Check-in</button>
+                <button class="chip" id="summaryBtn">Session summary</button>
+            </div>
+
+            <form id="chatForm" class="composer">
+                <input id="userInput" type="text" placeholder="Tell me what is on your mind..." autocomplete="off" required />
+                <button type="submit">Send</button>
+            </form>
+        </section>
+
+        <aside class="panel side">
+            <div class="card">
+                <h2>Learning Profile</h2>
+                <p class="muted" id="profileLine">No saved profile yet.</p>
+            </div>
+            <div class="card">
+                <h2>Mood Tracker</h2>
+                <div class="mood">
+                    <span>Low</span>
+                    <input id="moodSlider" type="range" min="1" max="10" value="5" />
+                    <span>High</span>
+                </div>
+                <p class="stat">Current mood: <strong id="moodValue">5</strong>/10</p>
+                <button class="primary" id="saveMoodBtn" type="button">Save mood</button>
+            </div>
+            <div class="card">
+                <h2>Insights</h2>
+                <p class="muted" id="insightsLine">No patterns detected yet.</p>
+                <p class="stat" id="sessionCount">Sessions: 0</p>
+            </div>
+            <div class="card">
+                <h2>Privacy</h2>
+                <p class="muted">Your memory is stored only in this browser via localStorage.</p>
+                <button class="chip" id="resetBtn" type="button">Reset memory</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        const STORAGE_KEY = "mindful_therapist_ai_v1";
+        const chatEl = document.getElementById("chat");
+        const formEl = document.getElementById("chatForm");
+        const inputEl = document.getElementById("userInput");
+        const profileLineEl = document.getElementById("profileLine");
+        const insightsLineEl = document.getElementById("insightsLine");
+        const sessionCountEl = document.getElementById("sessionCount");
+        const moodSliderEl = document.getElementById("moodSlider");
+        const moodValueEl = document.getElementById("moodValue");
+
+        const defaultState = {
+            sessions: 0,
+            messages: [],
+            moodHistory: [],
+            lastMood: null,
+            profile: {
+                name: "",
+                goals: [],
+                stressors: [],
+                helps: []
+            },
+            themes: {
+                anxiety: 0,
+                sadness: 0,
+                stress: 0,
+                confidence: 0,
+                gratitude: 0
+            }
+        };
+
+        let state = loadState();
+
+        function loadState() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+                return parsed ? { ...defaultState, ...parsed } : { ...defaultState };
+            } catch {
+                return { ...defaultState };
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function addMessage(role, text) {
+            state.messages.push({ role, text, time: Date.now() });
+            renderMessages();
+            saveState();
+        }
+
+        function renderMessages() {
+            chatEl.innerHTML = "";
+            const recent = state.messages.slice(-80);
+            recent.forEach((m) => {
+                const wrap = document.createElement("div");
+                wrap.className = "msg " + (m.role === "user" ? "user" : "ai");
+                const label = document.createElement("span");
+                label.className = "label";
+                label.textContent = m.role === "user" ? "You" : "Therapist AI";
+                const content = document.createElement("span");
+                content.textContent = m.text;
+                wrap.appendChild(label);
+                wrap.appendChild(content);
+                chatEl.appendChild(wrap);
+            });
+            chatEl.scrollTop = chatEl.scrollHeight;
+        }
+
+        function normalize(text) {
+            return text.toLowerCase().replace(/[^\w\s']/g, " ");
+        }
+
+        function extractLearning(text) {
+            const clean = normalize(text);
+
+            const nameMatch = text.match(/my name is ([a-zA-Z'-]{2,30})/i);
+            if (nameMatch) state.profile.name = nameMatch[1];
+
+            const goalMatch = text.match(/(?:my goal is|i want to|i need to)\s+(.+)/i);
+            if (goalMatch) pushUnique(state.profile.goals, goalMatch[1].trim(), 5);
+
+            const stressorMatch = text.match(/(?:i am stressed about|i worry about|i keep thinking about)\s+(.+)/i);
+            if (stressorMatch) pushUnique(state.profile.stressors, stressorMatch[1].trim(), 5);
+
+            const helpsMatch = text.match(/(?:it helps when|what helps me is|i feel better when)\s+(.+)/i);
+            if (helpsMatch) pushUnique(state.profile.helps, helpsMatch[1].trim(), 5);
+
+            const map = {
+                anxiety: ["anxious", "panic", "overthink", "nervous", "fear", "scared"],
+                sadness: ["sad", "empty", "hopeless", "down", "alone", "cry"],
+                stress: ["stress", "burnout", "overwhelmed", "pressure", "exhausted"],
+                confidence: ["confident", "proud", "strong", "capable"],
+                gratitude: ["grateful", "thankful", "appreciate", "blessed"]
+            };
+
+            Object.keys(map).forEach((theme) => {
+                if (map[theme].some((k) => clean.includes(k))) {
+                    state.themes[theme] += 1;
+                }
+            });
+        }
+
+        function pushUnique(list, value, max) {
+            if (!value) return;
+            const normalized = value.toLowerCase();
+            if (list.some((item) => item.toLowerCase() === normalized)) return;
+            list.unshift(value);
+            if (list.length > max) list.length = max;
+        }
+
+        function detectRisk(text) {
+            const clean = normalize(text);
+            const riskTerms = [
+                "kill myself", "suicide", "end my life", "hurt myself",
+                "self harm", "harm myself", "want to die"
+            ];
+            return riskTerms.some((term) => clean.includes(term));
+        }
+
+        function topThemes() {
+            return Object.entries(state.themes)
+                .sort((a, b) => b[1] - a[1])
+                .filter(([, count]) => count > 0)
+                .slice(0, 2)
+                .map(([name]) => name);
+        }
+
+        function mindfulResponse(userText) {
+            if (detectRisk(userText)) {
+                return "I am really glad you said this out loud. Your safety matters more than this chat. Please call 911 now if you are in immediate danger, or call/text 988 in the US for the Suicide & Crisis Lifeline. If you can, tell me where you are and if someone trusted can stay with you right now.";
+            }
+
+            const clean = normalize(userText);
+            let emotionLine = "I hear you, and I want to understand this with care.";
+            if (/anxious|panic|nervous|fear|scared/.test(clean)) emotionLine = "That sounds like a lot of anxiety in your system right now.";
+            if (/sad|down|hopeless|alone|empty/.test(clean)) emotionLine = "It sounds heavy and painful, and you are not carrying it alone in this moment.";
+            if (/stress|overwhelmed|burnout|pressure|exhausted/.test(clean)) emotionLine = "You are carrying a lot of pressure, and your mind seems overloaded.";
+            if (/angry|frustrated|mad/.test(clean)) emotionLine = "I can hear frustration, and it makes sense that your system is on edge.";
+            if (/happy|good|better|proud|grateful/.test(clean)) emotionLine = "I can hear positive movement in you, and that is important to notice.";
+
+            const memoryBits = [];
+            if (state.profile.name) memoryBits.push(state.profile.name + ",");
+            if (state.profile.goals.length) memoryBits.push("you have been working toward: " + state.profile.goals[0] + ".");
+            if (state.profile.helps.length) memoryBits.push("You said this helps: " + state.profile.helps[0] + ".");
+            const memoryLine = memoryBits.length ? memoryBits.join(" ") : "";
+
+            let intervention = "Would you like to do a 30-second breath cycle with me: inhale 4, hold 4, exhale 6, repeat 4 times?";
+            if (/overthink|worry|anxious|panic/.test(clean)) {
+                intervention = "Try this grounding check: name 5 things you see, 4 you feel, 3 you hear, 2 you smell, and 1 you taste.";
+            } else if (/sad|hopeless|down/.test(clean)) {
+                intervention = "For the next 10 minutes, choose one tiny caring action: water, shower, short walk, or message one safe person.";
+            } else if (/stress|burnout|pressure/.test(clean)) {
+                intervention = "Let us reduce overload: what is one task you can postpone, one task you can delegate, and one task you can finish in 15 minutes?";
+            }
+
+            const question = "What feels like the hardest part right now, and what would make the next hour 5% easier?";
+
+            return [emotionLine, memoryLine, intervention, question].filter(Boolean).join(" ");
+        }
+
+        function updateSidebar() {
+            const profileParts = [];
+            if (state.profile.name) profileParts.push("Name: " + state.profile.name);
+            if (state.profile.goals.length) profileParts.push("Top goal: " + state.profile.goals[0]);
+            if (state.profile.stressors.length) profileParts.push("Main stressor: " + state.profile.stressors[0]);
+            if (state.profile.helps.length) profileParts.push("Best support: " + state.profile.helps[0]);
+            profileLineEl.textContent = profileParts.length ? profileParts.join(" | ") : "No saved profile yet.";
+
+            const themes = topThemes();
+            if (!themes.length) {
+                insightsLineEl.textContent = "No patterns detected yet.";
+            } else {
+                insightsLineEl.textContent = "Top patterns this session history: " + themes.join(", ") + ".";
+            }
+
+            sessionCountEl.textContent = "Sessions: " + state.sessions;
+            moodValueEl.textContent = String(moodSliderEl.value);
+        }
+
+        function generateSummary() {
+            const recentUserMsgs = state.messages.filter((m) => m.role === "user").slice(-5).map((m) => m.text);
+            const themes = topThemes();
+            const moodTrend = state.moodHistory.length >= 2
+                ? state.moodHistory[state.moodHistory.length - 1] - state.moodHistory[state.moodHistory.length - 2]
+                : 0;
+            const trendLine = moodTrend > 0 ? "Mood trend is slightly up." : moodTrend < 0 ? "Mood trend dipped slightly." : "Mood trend is steady.";
+
+            const lines = [
+                "Summary:",
+                themes.length ? "Main emotional themes: " + themes.join(", ") + "." : "Main emotional themes: still emerging.",
+                state.profile.goals.length ? "Current goal: " + state.profile.goals[0] + "." : "Current goal: not recorded yet.",
+                state.profile.helps.length ? "Useful support: " + state.profile.helps[0] + "." : "Useful support: not recorded yet.",
+                trendLine
+            ];
+            if (recentUserMsgs.length) lines.push("Recent focus: " + recentUserMsgs[recentUserMsgs.length - 1]);
+            return lines.join(" ");
+        }
+
+        formEl.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const userText = inputEl.value.trim();
+            if (!userText) return;
+
+            addMessage("user", userText);
+            extractLearning(userText);
+            const aiText = mindfulResponse(userText);
+            addMessage("ai", aiText);
+            updateSidebar();
+            inputEl.value = "";
+        });
+
+        document.querySelectorAll(".chip[data-seed]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                inputEl.value = btn.getAttribute("data-seed");
+                inputEl.focus();
+            });
+        });
+
+        document.getElementById("summaryBtn").addEventListener("click", () => {
+            addMessage("ai", generateSummary());
+            updateSidebar();
+        });
+
+        moodSliderEl.addEventListener("input", () => {
+            moodValueEl.textContent = String(moodSliderEl.value);
+        });
+
+        document.getElementById("saveMoodBtn").addEventListener("click", () => {
+            const mood = Number(moodSliderEl.value);
+            state.lastMood = mood;
+            state.moodHistory.push(mood);
+            if (state.moodHistory.length > 120) state.moodHistory.shift();
+            state.sessions += 1;
+            saveState();
+            updateSidebar();
+            addMessage("ai", "Mood saved at " + mood + "/10. Thanks for checking in with yourself.");
+        });
+
+        document.getElementById("resetBtn").addEventListener("click", () => {
+            localStorage.removeItem(STORAGE_KEY);
+            state = { ...defaultState };
+            renderMessages();
+            updateSidebar();
+            addMessage("ai", "Memory cleared. We can start fresh.");
+        });
+
+        function boot() {
+            renderMessages();
+            if (!state.messages.length) {
+                addMessage("ai", "Hi. I am your mindful therapist AI. Share what you are feeling, and I will reflect with you, remember your patterns, and help you take one grounded next step.");
+            }
+            updateSidebar();
+        }
+
+        boot();
+    </script>
+</body>
+</html>
